@@ -29,11 +29,20 @@ A small Python tool that reads a HAR file exported from Chrome DevTools and turn
 
 5. Find the CSV report in `reports/api_activity.csv`.
 
+## Run the tests
+
+```
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
 ## Project layout
 
 ```
 .
 ├── monitor.py
+├── test_monitor.py
+├── requirements-dev.txt
 ├── har/          # your exported HAR files (not committed)
 └── reports/      # generated CSV reports (not committed)
 ```

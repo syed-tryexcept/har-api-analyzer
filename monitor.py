@@ -8,7 +8,6 @@ BASE_DIR = Path.home() / "Desktop" / "RailwayApiMonitor"
 HAR_FILE = BASE_DIR / "har" / "activity.har"
 REPORT_DIR = BASE_DIR / "reports"
 REPORT_FILE = REPORT_DIR / "api_activity.csv"
-REPORT_DIR.mkdir(parents=True, exist_ok=True)
 
 KEYWORDS = ["seat-layout", "reserve-seat", "release-seat", "passenger-details"]
 FIELDS = ["timestamp", "method", "endpoint", "status", "duration_ms", "resource_type"]
@@ -35,16 +34,8 @@ def to_int(value):
         return 0
 
 
-def main():
-    if not HAR_FILE.exists():
-        print("HAR file not found!")
-        print(f"Expected location: {HAR_FILE}")
-        return
-
-    with open(HAR_FILE, encoding="utf-8") as f:
-        data = json.load(f)
-
-    entries = data.get("log", {}).get("entries", [])
+def parse_entries(entries):
+    """Turn raw HAR entries into flat rows. Only safe fields are kept."""
     rows = []
     for e in entries:
         req = e.get("request", {})
@@ -57,7 +48,21 @@ def main():
             "duration_ms": round(e.get("time", 0), 1),
             "resource_type": e.get("_resourceType", ""),
         })
+    return rows
 
+
+def main():
+    if not HAR_FILE.exists():
+        print("HAR file not found!")
+        print(f"Expected location: {HAR_FILE}")
+        return
+
+    with open(HAR_FILE, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = parse_entries(data.get("log", {}).get("entries", []))
+
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
     with open(REPORT_FILE, "w", newline="", encoding="utf-8-sig") as f:
         w = csv.DictWriter(f, fieldnames=FIELDS)
         w.writeheader()
@@ -117,4 +122,5 @@ def main():
     print("\nDone. This program only analyzes the exported log.")
 
 
-main()
+if __name__ == "__main__":
+    main()
