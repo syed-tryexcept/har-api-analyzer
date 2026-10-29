@@ -1,0 +1,5 @@
+har/
+reports/
+__pycache__/
+*.har
+.env
